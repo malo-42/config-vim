@@ -69,6 +69,59 @@ nnoremap <leader>w :w<CR>
 nnoremap <leader>q :q<CR>
 nnoremap <leader>h :nohlsearch<CR>
 nnoremap <leader>i mzgg=G`zzz
+set hidden
+set showtabline=2
+function! s:BufferLabel(buf, tails) abort
+  if empty(a:buf.name)
+    return '[No Name]'
+  endif
+  let tail = fnamemodify(a:buf.name, ':t')
+  if count(a:tails, tail) > 1
+    return fnamemodify(a:buf.name, ':~:.')
+  endif
+  return tail
+endfunction
+function! s:VisibleRange(widths, current) abort
+  let first = a:current
+  let last = a:current
+  let used = a:widths[a:current]
+  let grew = 1
+  while grew
+    let grew = 0
+    if last + 1 < len(a:widths) && used + a:widths[last + 1] <= &columns
+      let last += 1
+      let used += a:widths[last]
+      let grew = 1
+    endif
+    if first > 0 && used + a:widths[first - 1] <= &columns
+      let first -= 1
+      let used += a:widths[first]
+      let grew = 1
+    endif
+  endwhile
+  return [first, last]
+endfunction
+function! BufferTabline() abort
+  let buffers = getbufinfo({'buflisted': 1})
+  if empty(buffers)
+    return ''
+  endif
+  let tails = map(copy(buffers), 'fnamemodify(v:val.name, ":t")')
+  let labels = map(copy(buffers),
+        \ '" " . s:BufferLabel(v:val, tails) . (v:val.changed ? " +" : "") . " "')
+  let current = max([0, index(map(copy(buffers), 'v:val.bufnr'), bufnr('%'))])
+  let [first, last] = s:VisibleRange(map(copy(labels), 'strwidth(v:val)'), current)
+  let line = ''
+  for i in range(first, last)
+    let line .= buffers[i].bufnr == bufnr('%') ? '%#TabLineSel#' : '%#TabLine#'
+    let line .= substitute(labels[i], '%', '%%', 'g')
+  endfor
+  return line . '%#TabLineFill#'
+endfunction
+set tabline=%!BufferTabline()
+nnoremap ]b :bnext<CR>
+nnoremap [b :bprevious<CR>
+nnoremap <leader>x :bdelete<CR>
 nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
