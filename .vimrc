@@ -69,6 +69,59 @@ nnoremap <leader>w :w<CR>
 nnoremap <leader>q :q<CR>
 nnoremap <leader>h :nohlsearch<CR>
 nnoremap <leader>i mzgg=G`zzz
+set hidden
+set showtabline=2
+function! s:BufferLabel(buf, tails) abort
+  if empty(a:buf.name)
+    return '[No Name]'
+  endif
+  let tail = fnamemodify(a:buf.name, ':t')
+  if count(a:tails, tail) > 1
+    return fnamemodify(a:buf.name, ':~:.')
+  endif
+  return tail
+endfunction
+function! s:VisibleRange(widths, current) abort
+  let first = a:current
+  let last = a:current
+  let used = a:widths[a:current]
+  let grew = 1
+  while grew
+    let grew = 0
+    if last + 1 < len(a:widths) && used + a:widths[last + 1] <= &columns
+      let last += 1
+      let used += a:widths[last]
+      let grew = 1
+    endif
+    if first > 0 && used + a:widths[first - 1] <= &columns
+      let first -= 1
+      let used += a:widths[first]
+      let grew = 1
+    endif
+  endwhile
+  return [first, last]
+endfunction
+function! BufferTabline() abort
+  let buffers = getbufinfo({'buflisted': 1})
+  if empty(buffers)
+    return ''
+  endif
+  let tails = map(copy(buffers), 'fnamemodify(v:val.name, ":t")')
+  let labels = map(copy(buffers),
+        \ '" " . s:BufferLabel(v:val, tails) . (v:val.changed ? " +" : "") . " "')
+  let current = max([0, index(map(copy(buffers), 'v:val.bufnr'), bufnr('%'))])
+  let [first, last] = s:VisibleRange(map(copy(labels), 'strwidth(v:val)'), current)
+  let line = ''
+  for i in range(first, last)
+    let line .= buffers[i].bufnr == bufnr('%') ? '%#TabLineSel#' : '%#TabLine#'
+    let line .= substitute(labels[i], '%', '%%', 'g')
+  endfor
+  return line . '%#TabLineFill#'
+endfunction
+set tabline=%!BufferTabline()
+nnoremap ]b :bnext<CR>
+nnoremap [b :bprevious<CR>
+nnoremap <leader>x :bdelete<CR>
 nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
@@ -84,6 +137,47 @@ nnoremap <C-u> <C-u>zz
 set path+=**
 set wildignore+=*/node_modules/*,*/.git/*,*/venv/*,*.o,*.pyc
 nnoremap <leader>f :find<Space>
+if exists('+findfunc')
+  let s:project_files = []
+  let s:find_max_depth = 4
+  function! s:ListProjectFiles() abort
+    if executable('rg')
+      return systemlist('rg --files --hidden --glob "!.git" --max-depth ' . s:find_max_depth)
+    endif
+    let files = []
+    for depth in range(1, s:find_max_depth)
+      call extend(files, glob(repeat('*/', depth - 1) . '*', 0, 1))
+    endfor
+    return filter(files, '!isdirectory(v:val)')
+  endfunction
+  function! s:FuzzyFind(cmdarg, cmdcomplete) abort
+    if empty(s:project_files)
+      let s:project_files = s:ListProjectFiles()
+    endif
+    if empty(a:cmdarg)
+      return s:project_files
+    endif
+    return matchfuzzy(s:project_files, a:cmdarg)
+  endfunction
+  let s:find_wildmode = exists('*wildtrigger') ? 'noselect:full' : 'full'
+  function! s:OnFindCmdline() abort
+    if getcmdline() !~# '^\s*fin\%[d]\s'
+      return
+    endif
+    let &wildmode = s:find_wildmode
+    if exists('*wildtrigger')
+      call wildtrigger()
+    endif
+  endfunction
+  set findfunc=s:FuzzyFind
+  set wildoptions+=pum
+  augroup fuzzy_find
+    autocmd!
+    autocmd CmdlineEnter : let s:project_files = [] | let s:saved_wildmode = &wildmode
+    autocmd CmdlineChanged : call s:OnFindCmdline()
+    autocmd CmdlineLeave : let &wildmode = s:saved_wildmode
+  augroup END
+endif
 if executable('rg')
   set grepprg=rg\ --vimgrep\ --smart-case
   set grepformat=%f:%l:%c:%m
