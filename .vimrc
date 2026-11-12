@@ -139,11 +139,16 @@ set wildignore+=*/node_modules/*,*/.git/*,*/venv/*,*.o,*.pyc
 nnoremap <leader>f :find<Space>
 if exists('+findfunc')
   let s:project_files = []
+  let s:find_max_depth = 4
   function! s:ListProjectFiles() abort
     if executable('rg')
-      return systemlist('rg --files --hidden --glob "!.git"')
+      return systemlist('rg --files --hidden --glob "!.git" --max-depth ' . s:find_max_depth)
     endif
-    return filter(glob('**', 0, 1), '!isdirectory(v:val)')
+    let files = []
+    for depth in range(1, s:find_max_depth)
+      call extend(files, glob(repeat('*/', depth - 1) . '*', 0, 1))
+    endfor
+    return filter(files, '!isdirectory(v:val)')
   endfunction
   function! s:FuzzyFind(cmdarg, cmdcomplete) abort
     if empty(s:project_files)
