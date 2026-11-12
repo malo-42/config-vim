@@ -84,6 +84,42 @@ nnoremap <C-u> <C-u>zz
 set path+=**
 set wildignore+=*/node_modules/*,*/.git/*,*/venv/*,*.o,*.pyc
 nnoremap <leader>f :find<Space>
+if exists('+findfunc')
+  let s:project_files = []
+  function! s:ListProjectFiles() abort
+    if executable('rg')
+      return systemlist('rg --files --hidden --glob "!.git"')
+    endif
+    return filter(glob('**', 0, 1), '!isdirectory(v:val)')
+  endfunction
+  function! s:FuzzyFind(cmdarg, cmdcomplete) abort
+    if empty(s:project_files)
+      let s:project_files = s:ListProjectFiles()
+    endif
+    if empty(a:cmdarg)
+      return s:project_files
+    endif
+    return matchfuzzy(s:project_files, a:cmdarg)
+  endfunction
+  let s:find_wildmode = exists('*wildtrigger') ? 'noselect:full' : 'full'
+  function! s:OnFindCmdline() abort
+    if getcmdline() !~# '^\s*fin\%[d]\s'
+      return
+    endif
+    let &wildmode = s:find_wildmode
+    if exists('*wildtrigger')
+      call wildtrigger()
+    endif
+  endfunction
+  set findfunc=s:FuzzyFind
+  set wildoptions+=pum
+  augroup fuzzy_find
+    autocmd!
+    autocmd CmdlineEnter : let s:project_files = [] | let s:saved_wildmode = &wildmode
+    autocmd CmdlineChanged : call s:OnFindCmdline()
+    autocmd CmdlineLeave : let &wildmode = s:saved_wildmode
+  augroup END
+endif
 if executable('rg')
   set grepprg=rg\ --vimgrep\ --smart-case
   set grepformat=%f:%l:%c:%m
