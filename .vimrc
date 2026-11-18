@@ -1,3 +1,4 @@
+set belloff=all
 set nocompatible
 filetype plugin indent on
 syntax enable
