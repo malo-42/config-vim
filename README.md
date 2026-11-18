@@ -1,46 +1,49 @@
-Touche leader : Espace
+# Config Vim
 
-Espace + w : sauvegarde le fichier actuel
+Touche leader : **Espace**
 
-Espace + q : quitte la fenêtre ou Vim
+## Fichiers et fenêtres
 
-Espace + h : efface la surbrillance de la recherche en cours
+| Touche | Action |
+|---|---|
+| `Espace + w` | Sauvegarde le fichier actuel |
+| `Espace + q` | Quitte la fenêtre ou Vim |
+| `Espace + h` | Efface la surbrillance de la recherche |
+| `Espace + i` | Réindente tout le fichier et remet le curseur exactement où il était |
+| `Espace + e` | Ouvre / ferme l'explorateur Netrw en arborescence à gauche |
+| `Espace + f` | Lance `:find` avec recherche floue (fuzzy) dans le projet |
+| `Espace + g` | Lance `:grep` avec ripgrep et ouvre la liste des résultats (quickfix) |
+| `Ctrl + h` | Va dans la fenêtre de gauche (marche aussi depuis Netrw) |
+| `Ctrl + j` | Va dans la fenêtre du bas |
+| `Ctrl + k` | Va dans la fenêtre du haut |
+| `Ctrl + l` | Va dans la fenêtre de droite (marche aussi depuis Netrw) |
+| `Ctrl + d` | Descend d'un demi-écran et centre le curseur |
+| `Ctrl + u` | Monte d'un demi-écran et centre le curseur |
+| `J` (mode visuel) | Déplace les lignes sélectionnées vers le bas et réindente |
+| `K` (mode visuel) | Déplace les lignes sélectionnées vers le haut et réindente |
 
-Espace + i : réindente tout le fichier et remet le curseur à sa position initiale
+## Buffers (les « onglets » de la barre du haut)
 
-Espace + x : ferme le buffer actuel
+Chaque onglet affiche son numéro (`1:main.c  2:utils.c +`). Le `+` indique un fichier modifié non sauvegardé.
 
-Espace + e : ouvre l'explorateur de fichiers Netrw en arborescence à gauche
+| Touche | Action |
+|---|---|
+| `H` / `L` | Buffer précédent / suivant (gauche / droite) |
+| `[b` / `]b` | Pareil que `H` / `L` |
+| `Espace + 1` à `9` | Va directement au buffer portant ce numéro |
+| `Espace + Espace` | Alterne avec le dernier buffer utilisé |
+| `Espace + b` | Choisir un buffer par son nom (tape quelques lettres puis `Tab`) |
+| `Espace + x` | Ferme le buffer actuel (refuse s'il n'est pas sauvegardé) |
+| `Espace + X` | Ferme tous les buffers sauf l'actuel (garde ceux non sauvegardés) |
 
-Espace + f : lance la commande :find avec recherche floue (fuzzy) dans le projet
+## Commandes
 
-Espace + g : lance la commande :grep avec ripgrep pour chercher du texte dans le projet
+- `:find motif` : recherche floue de fichiers sur 4 niveaux de dossiers maximum (ignore `.git`, `node_modules`, `venv`, `*.o`, `*.pyc`).
+- `:grep motif` : cherche un mot dans tous les fichiers du projet et ouvre la liste des résultats.
 
+## Notes
 
-]b : passe au buffer suivant
-
-[b : passe au buffer précédent
-
-
-Ctrl + h : va dans la fenêtre de gauche
-
-Ctrl + j : va dans la fenêtre du bas
-
-Ctrl + k : va dans la fenêtre du haut
-
-Ctrl + l : va dans la fenêtre de droite
-
-
-Ctrl + d : descend d'un demi-écran et centre le curseur au milieu
-
-Ctrl + u : monte d'un demi-écran et centre le curseur au milieu
-
-
-J (en mode visuel) : déplace les lignes sélectionnées vers le bas et réindente
-
-K (en mode visuel) : déplace les lignes sélectionnées vers le haut et réindente
-
-
-:find motif : recherche floue de fichiers (jusqu'à 4 sous-dossiers, ignore .git, node_modules, venv, *.o, *.pyc)
-
-:grep motif : cherche un mot dans tous les fichiers du projet et ouvre la liste des résultats (quickfix)
+- `H` et `L` remplacent les commandes natives « haut / bas de l'écran », rarement utilisées.
+- Les numéros 10 et plus s'affichent dans la barre mais n'ont pas de raccourci : utilise `Espace + b`.
+- Le fuzzy find demande Vim 9.1 ou plus récent (sinon `:find` classique).
+- Pour installer : copier le fichier `vimrc` vers `~/.vimrc`.
