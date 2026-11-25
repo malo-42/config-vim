@@ -60,6 +60,49 @@ augroup CustomCSyntax
   autocmd FileType c highlight cCustomFunc guifg=#87d7ff ctermfg=117
 augroup END
 
+" ---------------------------------------------------------------
+" Python
+" ---------------------------------------------------------------
+" Active appels de fonctions, builtins, self/cls, opérateurs, etc.
+" (doit être défini avant l'ouverture d'un fichier .py)
+let g:python_highlight_all = 1
+
+" Couleurs façon VSCode dark (doivent rester APRÈS le colorscheme).
+" Les noms de groupes de la syntaxe intégrée de Vim et ceux du plugin
+" python-syntax sont tous deux listés : ceux qui n'existent pas sont ignorés.
+highlight pythonStatement    guifg=#c586c0 ctermfg=176
+highlight pythonConditional  guifg=#c586c0 ctermfg=176
+highlight pythonRepeat       guifg=#c586c0 ctermfg=176
+highlight pythonInclude      guifg=#c586c0 ctermfg=176
+highlight pythonException    guifg=#c586c0 ctermfg=176
+highlight pythonAsync        guifg=#c586c0 ctermfg=176
+highlight pythonFunction     guifg=#dcdcaa ctermfg=186
+highlight pythonFunctionCall guifg=#dcdcaa ctermfg=186
+highlight pythonBuiltin      guifg=#dcdcaa ctermfg=186
+highlight pythonBuiltinFunc  guifg=#dcdcaa ctermfg=186
+highlight pythonDecorator    guifg=#dcdcaa ctermfg=186
+highlight pythonDecoratorName guifg=#dcdcaa ctermfg=186
+highlight pythonBuiltinObj   guifg=#4ec9b0 ctermfg=79
+highlight pythonExceptions   guifg=#4ec9b0 ctermfg=79
+highlight pythonExClass      guifg=#4ec9b0 ctermfg=79
+highlight pythonClassVar     guifg=#569cd6 ctermfg=75 gui=italic cterm=italic
+highlight pythonAttr         guifg=#9cdcfe ctermfg=117
+highlight pythonNumber       guifg=#b5cea8 ctermfg=151
+highlight pythonString       guifg=#ce9178 ctermfg=173
+highlight pythonRawString    guifg=#ce9178 ctermfg=173
+highlight pythonQuotes       guifg=#ce9178 ctermfg=173
+highlight pythonTripleQuotes guifg=#ce9178 ctermfg=173
+highlight pythonOperator     guifg=#d4d4d4 ctermfg=188
+highlight pythonComment      guifg=#6a9955 ctermfg=65
+
+augroup python_settings
+  autocmd!
+  autocmd FileType python setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
+  autocmd FileType python setlocal nosmartindent
+  " Attributs (self.x, obj.y) qui ne sont pas des appels de fonction
+  autocmd FileType python syntax match pythonAttr "\.\@<=\h\w*\>\%(\s*(\)\@!"
+augroup END
+
 set statusline=
 set statusline+=\ [%{mode()}]
 set statusline+=\ %f
