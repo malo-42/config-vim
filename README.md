@@ -8,15 +8,22 @@ Config pensée pour le **C** (norminette) et le **Python** (flake8 / mypy).
 
 ### 1. Installer la config
 
-```bash
-# Vérifier la version de Vim (9.1 ou plus pour le fuzzy find)
-vim --version | head -n 1
+Vérifier la version de Vim (9.1 ou plus pour le fuzzy find) :
 
-# Sauvegarder l'ancienne config, puis installer la nouvelle
+```bash
+vim --version | head -n 1
+```
+
+Sauvegarder l'ancienne config, puis installer la nouvelle :
+
+```bash
 cp ~/.vimrc ~/.vimrc.bak
 cp vimrc ~/.vimrc
+```
 
-# Vérifier que c'est la bonne version (doit afficher 1 ou plus)
+Vérifier que c'est la bonne version (doit afficher 1 ou plus) :
+
+```bash
 grep -c python_highlight_all ~/.vimrc
 ```
 
@@ -24,8 +31,9 @@ Le dossier `~/.vim/undodir` est créé automatiquement au premier lancement de V
 
 ### 2. Installer flake8 et mypy
 
+Tester s'ils sont déjà installés :
+
 ```bash
-# Tester s'ils sont déjà installés
 python3 -m flake8 --version
 python3 -m mypy --version
 ```
@@ -51,7 +59,7 @@ source ~/.venv/bin/activate
 vim fichier.py
 ```
 
-soit tu modifies ces deux lignes dans `~/.vimrc` (section Python) :
+Soit tu modifies ces deux lignes dans `~/.vimrc` (section Python) :
 
 ```vim
 autocmd FileType python setlocal makeprg=~/.venv/bin/python\ -m\ flake8\ %
@@ -62,11 +70,16 @@ let out = system(expand('~/.venv/bin/python') . ' -m mypy ' . shellescape(expand
 
 ### 3. ripgrep (optionnel)
 
-Rend `:grep` et `:find` plus rapides :
+Rend `:grep` et `:find` plus rapides. Sur Linux :
 
 ```bash
-sudo apt install ripgrep      # Linux
-brew install ripgrep          # macOS
+sudo apt install ripgrep
+```
+
+Sur macOS :
+
+```bash
+brew install ripgrep
 ```
 
 Sans ripgrep, tout fonctionne quand même : `:find` utilise une méthode de secours et `:grep` utilise le `grep` classique (écris `:grep -r motif .`).
@@ -81,6 +94,8 @@ Dans Vim :
 
 ```vim
 :echo g:python_highlight_all
+```
+```vim
 :echo synIDattr(synID(line('.'), col('.'), 1), 'name')
 ```
 
