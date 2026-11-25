@@ -2,11 +2,15 @@
 
 Touche leader : **Espace**
 
-Config pensée pour le **C** (norminette) et le **Python** (flake8 / mypy).
+Config pensée pour le **C** (norminette) et le **Python** (flake8 / mypy), pour Fedora (WSL ou natif).
 
-## Installation
+## Installation (Fedora)
 
-### 1. Installer la config
+### 1. Installer Vim, ripgrep et pip
+
+```bash
+sudo dnf install vim-enhanced ripgrep python3-pip
+```
 
 Vérifier la version de Vim (9.1 ou plus pour le fuzzy find) :
 
@@ -14,11 +18,18 @@ Vérifier la version de Vim (9.1 ou plus pour le fuzzy find) :
 vim --version | head -n 1
 ```
 
-Sauvegarder l'ancienne config, puis installer la nouvelle :
+### 2. Installer la config
+
+Depuis le dossier qui contient le fichier `vimrc` :
+
+```bash
+cp vimrc ~/.vimrc
+```
+
+Si tu avais déjà un `~/.vimrc` à garder, sauvegarde-le avant :
 
 ```bash
 cp ~/.vimrc ~/.vimrc.bak
-cp vimrc ~/.vimrc
 ```
 
 Vérifier que c'est la bonne version (doit afficher 1 ou plus) :
@@ -29,62 +40,40 @@ grep -c python_highlight_all ~/.vimrc
 
 Le dossier `~/.vim/undodir` est créé automatiquement au premier lancement de Vim.
 
-### 2. Installer flake8 et mypy
-
-Tester s'ils sont déjà installés :
+### 3. Installer flake8 et mypy
 
 ```bash
-python3 -m flake8 --version
-python3 -m mypy --version
+sudo dnf install python3-flake8 python3-mypy
 ```
 
-S'ils manquent, **option A** :
+Si ces paquets ne sont pas disponibles, passe par pip :
 
 ```bash
-python3 -m ensurepip --user
 python3 -m pip install --user flake8 mypy
 ```
 
-Si pip n'existe pas ou refuse (erreur `externally-managed-environment`), **option B** avec un venv :
+Si pip refuse (erreur `externally-managed-environment`), utilise un venv :
 
 ```bash
 python3 -m venv ~/.venv
 ~/.venv/bin/pip install flake8 mypy
 ```
 
-Avec l'option B, Vim doit utiliser le Python du venv. Soit tu l'actives avant de lancer Vim :
+Avec le venv, active-le avant d'utiliser flake8 ou mypy :
 
 ```bash
 source ~/.venv/bin/activate
-vim fichier.py
 ```
-
-Soit tu modifies ces deux lignes dans `~/.vimrc` (section Python) :
-
-```vim
-autocmd FileType python setlocal makeprg=~/.venv/bin/python\ -m\ flake8\ %
-```
-```vim
-let out = system(expand('~/.venv/bin/python') . ' -m mypy ' . shellescape(expand('%')))
-```
-
-### 3. ripgrep (optionnel)
-
-Rend `:grep` et `:find` plus rapides. Sur Linux :
-
-```bash
-sudo apt install ripgrep
-```
-
-Sur macOS :
-
-```bash
-brew install ripgrep
-```
-
-Sans ripgrep, tout fonctionne quand même : `:find` utilise une méthode de secours et `:grep` utilise le `grep` classique (écris `:grep -r motif .`).
 
 ### 4. Vérifier que tout marche
+
+```bash
+python3 -m flake8 --version
+python3 -m mypy --version
+rg --version
+```
+
+Ouvrir un fichier Python :
 
 ```bash
 vim test.py
@@ -100,8 +89,7 @@ Dans Vim :
 ```
 
 - La première commande doit afficher `1`.
-- La seconde affiche le nom du groupe de coloration sous le curseur. Utile si une couleur ne s'applique pas : ajoute alors une ligne `highlight NomDuGroupe guifg=#xxxxxx ctermfg=NNN` dans la section Python du `vimrc`.
-- Sur un fichier `.py`, `Espace + l` lance flake8 et `Espace + m` lance mypy.
+- La seconde affiche le nom du groupe de coloration sous le curseur. Utile si une couleur ne s'applique pas : ajoute alors une ligne `highlight NomDuGroupe guifg=#xxxxxx ctermfg=NNN` dans la section Python du `~/.vimrc`.
 
 ## Fichiers et fenêtres
 
@@ -142,24 +130,25 @@ Chaque onglet affiche son numéro (`1:main.c  2:utils.c +`). Le `+` indique un f
 Actif automatiquement dans les fichiers `.py` :
 
 - Indentation de 4 espaces, sans tabulations.
-- Ligne verticale à la colonne 80 : tout ce qui dépasse à gauche de cette ligne respecte la limite flake8 de 79 caractères.
 - Coloration façon VSCode dark : mots-clés, appels de fonctions, builtins, décorateurs, `self` / `cls`, attributs (`self.x`), nombres, chaînes, commentaires.
 - Les espaces en fin de ligne et les erreurs d'indentation sont surlignés en rouge.
 
-| Touche (dans un `.py`) | Action |
-|---|---|
-| `Espace + l` | Sauvegarde puis lance **flake8** ; les erreurs s'ouvrent dans la quickfix list (rien ne s'ouvre s'il n'y a aucune erreur) |
-| `Espace + m` | Sauvegarde puis lance **mypy** ; les erreurs s'ouvrent dans la quickfix list, sinon affiche « mypy : aucune erreur » |
+flake8 et mypy se lancent dans le terminal :
+
+```bash
+python3 -m flake8 fichier.py
+python3 -m mypy fichier.py
+```
 
 ## Commandes
 
 - `:find motif` : recherche floue de fichiers sur 4 niveaux de dossiers maximum (ignore `.git`, `node_modules`, `venv`, `*.o`, `*.pyc`).
 - `:grep motif` : cherche un mot dans tous les fichiers du projet et ouvre la liste des résultats.
-- `:copen` / `:cclose` : ouvre / ferme la liste des erreurs (quickfix).
-- `:cnext` / `:cprev` : va à l'erreur suivante / précédente.
-- `:cc 3` : va directement à l'erreur n°3 de la liste.
+- `:copen` / `:cclose` : ouvre / ferme la liste des résultats (quickfix).
+- `:cnext` / `:cprev` : va au résultat suivant / précédent.
+- `:cc 3` : va directement au résultat n°3 de la liste.
 
-Dans la liste des erreurs, `Entrée` sur une ligne saute à l'endroit concerné.
+Dans la liste des résultats, `Entrée` sur une ligne saute à l'endroit concerné.
 
 ## Notes
 
